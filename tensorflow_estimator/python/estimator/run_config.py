@@ -57,7 +57,7 @@ _DEFAULT_REPLACEABLE_LIST = [
 ]
 
 _SAVE_CKPT_ERR = (
-    '`save_checkpoints_steps` and `save_checkpoints_secs` cannot be both set.'
+    '`save_checkpoints_steps` and `save_checkpoints_secs` the variable cannot be set to both.'
 )
 
 _TF_CONFIG_ENV = 'TF_CONFIG'
@@ -77,12 +77,12 @@ def _get_session_master(cluster_spec, task_type, task_id, tf_config):
   """Returns the appropriate address for TensorFlow master.
 
   The order of precedence to determine the TF session master is as follows:
-  1. If `tf_session_master` is set in TF_CONFIG environment variable, takes it.
+  1. If `tf_session_master` is set in TF_CONFIG environment variable, then the variable takes it.
   2. If the cluster has only one node, returns empty string ''.
   3. Returns the grpc address according to the task type and id in the cluster.
      This is between-graph replication.
 
-  Note: task_type and task_id must be validated. Typically, validated using
+  Note: task_type and task_id must be validated. Typically, validation can be done by using
   `_validate_task_type_and_task_id`.
 
   Args:
@@ -104,7 +104,7 @@ def _get_session_master(cluster_spec, task_type, task_id, tf_config):
 
   jobs = cluster_spec.jobs
 
-  # If there is only one node in the cluster, do things locally by setting
+  # If there is only one node in the cluster and to do things locally, set
   # master to ''.  If a service or user sets TF_CONFIG with a single node, it's
   # more performant to use a direct master rather than an RPC service.
   if len(jobs) == 1 and len(cluster_spec.job_tasks(jobs[0])) == 1:
@@ -179,7 +179,7 @@ def _validate_task_type_and_task_id(cluster_spec, task_env, chief_task_type):
 
   task_id = int(task_id)
 
-  # Check the task id bounds. Upper bound is not necessary as
+  # Check the task id bounds. Upper bound is not necessary, as
   # - for evaluator, there is no upper bound.
   # - for non-evaluator, task id is upper bounded by the number of jobs in
   # cluster spec, which will be checked later (when retrieving the `master`)
@@ -210,7 +210,7 @@ def _validate_task_type_and_task_id(cluster_spec, task_env, chief_task_type):
 def _get_global_id_in_cluster(
     cluster_spec, task_type, task_id, chief_task_type):
   """Returns the global id in cluster."""
-  # Note: This is implementation details, which user should not rely on.
+  # Note: This is the implementation details, which the user should not rely on.
   # The first id is 0, which is always for the `chief` node. All other nodes,
   # except `ps`, are ordered alphabetical based on task type (alphabetically)
   # and task id (ascendingly). `ps` are ordered last.
@@ -358,7 +358,7 @@ class RunConfig(object):
 
     All distributed training related properties `cluster_spec`, `is_chief`,
     `master` , `num_worker_replicas`, `num_ps_replicas`, `task_id`, and
-    `task_type` are set based on the `TF_CONFIG` environment variable, if the
+    `task_type` are set based on the `TF_CONFIG` environment variable only if the
     pertinent information is present. The `TF_CONFIG` environment variable is a
     JSON object with attributes: `cluster` and `task`.
 
@@ -448,7 +448,7 @@ class RunConfig(object):
     N.B.: If `save_checkpoints_steps` or `save_checkpoints_secs` is set,
     `keep_checkpoint_max` might need to be adjusted accordingly, especially in
     distributed training. For example, setting `save_checkpoints_secs` as 60
-    without adjusting `keep_checkpoint_max` (defaults to 5) leads to situation
+    without adjusting `keep_checkpoint_max` (defaults to 5) leads to a situation
     that checkpoint would be garbage collected after 5 minutes. In distributed
     training, the evaluation job starts asynchronously and might fail to load or
     find the checkpoint due to race condition.
@@ -490,7 +490,7 @@ class RunConfig(object):
       protocol: An optional argument which specifies the protocol used when
         starting server. `None` means default to grpc.
       eval_distribute: An optional instance of `tf.distribute.Strategy`.
-        If specified, then Estimator will distribute the user's model during
+        If specified, then the Estimator will distribute the user's model during
         evaluation, according to the policy specified by that strategy.
         Setting `experimental_distribute.eval_distribute` is preferred.
       experimental_distribute: An optional
@@ -667,7 +667,7 @@ class RunConfig(object):
   def _init_distributed_setting_from_environment_var_with_master(self,
                                                                  tf_config):
     """Initialize distributed properties for legacy cluster with `master`."""
-    # There is no tech reason, why user cannot have chief and master in the same
+    # There is no tech reason why user cannot have chief and master in the same
     # cluster, but it is super confusing (which is really the chief?). So, block
     # this case.
     if TaskType.CHIEF in self._cluster_spec.jobs:
@@ -925,8 +925,8 @@ def _get_model_dir(tf_config, model_dir):
   # pylint: disable=g-explicit-bool-comparison
 
   # Empty string is treated as False in Python condition check, which triggers
-  # some confusing error messages. For example, 'a or b' returns None if a is ''
-  # and b is None. `None` is allowed for model_dir but '' is not allowed. Here,
+  # some confusing error messages. For example, 'a or b' returns None if 'a is ''
+  # and 'b is None. `None` is allowed for model_dir but '' is not allowed. Here,
   # explicitly check empty string to provide clear error message.
   if model_dir == '':
     raise ValueError('model_dir should be non-empty.')
